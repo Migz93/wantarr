@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"github.com/l3uddz/wantarr/database"
-	pvrObj "github.com/l3uddz/wantarr/pvr"
+	"time"
+
+	"github.com/migz93/wantarr/database"
+	pvrObj "github.com/migz93/wantarr/pvr"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/tommysolsen/capitalise"
-	"time"
 )
 
 var missingCmd = &cobra.Command{
@@ -35,7 +35,7 @@ var missingCmd = &cobra.Command{
 		// retrieve missing records from pvr and stash in database
 		existingItemsCount := database.GetItemsCount(lowerPvrName, "missing")
 		if flagRefreshCache || existingItemsCount < 1 {
-			log.Infof("Retrieving missing media from %s: %q", capitalise.First(pvrConfig.Type), pvrName)
+			log.Infof("Retrieving missing media from %s: %q", (pvrConfig.Type), pvrName)
 
 			missingRecords, err := pvr.GetWantedMissing()
 			if err != nil {

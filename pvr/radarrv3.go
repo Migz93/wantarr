@@ -2,14 +2,15 @@ package pvr
 
 import (
 	"fmt"
-	"github.com/imroc/req"
-	"github.com/l3uddz/wantarr/config"
-	"github.com/l3uddz/wantarr/logger"
-	"github.com/l3uddz/wantarr/utils/web"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"strings"
 	"time"
+
+	"github.com/imroc/req"
+	"github.com/migz93/wantarr/config"
+	"github.com/migz93/wantarr/logger"
+	"github.com/migz93/wantarr/utils/web"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 /* Structs */

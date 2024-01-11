@@ -1,7 +1,7 @@
 package paths
 
 import (
-	"github.com/l3uddz/wantarr/logger"
+	"github.com/migz93/wantarr/logger"
 	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"

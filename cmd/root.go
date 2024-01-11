@@ -2,21 +2,22 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/l3uddz/wantarr/build"
-	"github.com/l3uddz/wantarr/config"
-	"github.com/l3uddz/wantarr/database"
-	"github.com/l3uddz/wantarr/logger"
-	pvrObj "github.com/l3uddz/wantarr/pvr"
-	"github.com/l3uddz/wantarr/utils/paths"
-	stringutils "github.com/l3uddz/wantarr/utils/strings"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
-	"go.uber.org/atomic"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/migz93/wantarr/build"
+	"github.com/migz93/wantarr/config"
+	"github.com/migz93/wantarr/database"
+	"github.com/migz93/wantarr/logger"
+	pvrObj "github.com/migz93/wantarr/pvr"
+	"github.com/migz93/wantarr/utils/paths"
+	stringutils "github.com/migz93/wantarr/utils/strings"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
+	"go.uber.org/atomic"
 )
 
 var (

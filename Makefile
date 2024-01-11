@@ -57,7 +57,7 @@ ${BUILD_PATH}/${CMD}: ${GO_FILES} go.sum
 	CGO_ENABLED=1 go build \
 		-mod vendor \
 		-trimpath \
-		-ldflags "-s -w -X github.com/l3uddz/wantarr/build.Version=${VERSION} -X github.com/l3uddz/wantarr/build.GitCommit=${GIT_COMMIT} -X github.com/l3uddz/wantarr/build.Timestamp=${TIMESTAMP}" \
+		-ldflags "-s -w -X github.com/migz93/wantarr/build.Version=${VERSION} -X github.com/migz93/wantarr/build.GitCommit=${GIT_COMMIT} -X github.com/migz93/wantarr/build.Timestamp=${TIMESTAMP}" \
 		-o ${BUILD_PATH}/${CMD} \
 		.
 
@@ -84,9 +84,9 @@ publish: fetch ## Generate a release, and publish
 			-e VERSION="${GIT_TAG_NAME}" \
 			-e GIT_COMMIT="${GIT_COMMIT}" \
 			-e TIMESTAMP="${TIMESTAMP}" \
-			-v `pwd`:/go/src/github.com/l3uddz/wantarr \
+			-v `pwd`:/go/src/github.com/migz93/wantarr \
 			-v /var/run/docker.sock:/var/run/docker.sock \
-			-w /go/src/github.com/l3uddz/wantarr \
+			-w /go/src/github.com/migz93/wantarr \
 			neilotoole/xcgo:latest goreleaser --rm-dist
 
 .PHONY: snapshot
@@ -95,9 +95,9 @@ snapshot: fetch ## Generate a snapshot release
 		-e VERSION="${VERSION}" \
 		-e GIT_COMMIT="${GIT_COMMIT}" \
 		-e TIMESTAMP="${TIMESTAMP}" \
-		-v `pwd`:/go/src/github.com/l3uddz/wantarr \
+		-v `pwd`:/go/src/github.com/migz93/wantarr \
 		-v /var/run/docker.sock:/var/run/docker.sock \
-		-w /go/src/github.com/l3uddz/wantarr \
+		-w /go/src/github.com/migz93/wantarr \
 		neilotoole/xcgo:latest goreleaser --snapshot --skip-validate --skip-publish --rm-dist
 
 .PHONY: help

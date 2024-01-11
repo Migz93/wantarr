@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/l3uddz/wantarr/logger"
-	"github.com/l3uddz/wantarr/utils/lists"
+	"github.com/migz93/wantarr/logger"
+	"github.com/migz93/wantarr/utils/lists"
 
 	"github.com/imroc/req"
 	"github.com/jpillora/backoff"

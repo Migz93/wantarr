@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/l3uddz/wantarr/pvr"
+	"github.com/migz93/wantarr/pvr"
 	"github.com/pkg/errors"
 )
 

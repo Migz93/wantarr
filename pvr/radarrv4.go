@@ -1,7 +1,9 @@
 package pvr
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -15,7 +17,7 @@ import (
 
 /* Structs */
 
-type RadarrV2 struct {
+type RadarrV4 struct {
 	cfg        *config.Pvr
 	log        *logrus.Entry
 	apiUrl     string
@@ -23,27 +25,26 @@ type RadarrV2 struct {
 	timeout    int
 }
 
-type RadarrV2Movie struct {
-	Id         int
-	AirDateUtc time.Time `json:"inCinemas"`
-	Status     string
-	Monitored  bool
+type RadarrV4MovieFile struct {
+	QualityCutoffNotMet bool
 }
 
-type RadarrV2Wanted struct {
-	Page          int
-	PageSize      int
-	SortKey       string
-	SortDirection string
-	TotalRecords  int
-	Records       []RadarrV2Movie
+type RadarrV4Movie struct {
+	Id          int
+	AirDateUtc  time.Time `json:"inCinemas"`
+	DigitalUtc  time.Time `json:"digitalRelease"`
+	PhysicalUtc time.Time `json:"physicalRelease"`
+	Status      string
+	Monitored   bool
+	HasFile     bool
+	MovieFile   RadarrV4MovieFile
 }
 
-type RadarrV2SystemStatus struct {
+type RadarrV4SystemStatus struct {
 	Version string
 }
 
-type RadarrV2CommandStatus struct {
+type RadarrV4CommandStatus struct {
 	Name    string
 	Message string
 	Started time.Time
@@ -51,24 +52,28 @@ type RadarrV2CommandStatus struct {
 	Status  string
 }
 
-type RadarrV2CommandResponse struct {
+type RadarrV4CommandResponse struct {
 	Id int
 }
 
-type RadarrV2MovieSearch struct {
+type RadarrV4MovieSearch struct {
 	Name   string `json:"name"`
 	Movies []int  `json:"movieIds"`
 }
 
+type RadarrV4Wanted struct {
+	Records []RadarrV4Movie
+}
+
 /* Initializer */
 
-func NewRadarrV2(name string, c *config.Pvr) *RadarrV2 {
+func NewRadarrV4(name string, c *config.Pvr) *RadarrV4 {
 	// set api url
 	apiUrl := ""
-	if strings.Contains(c.URL, "/api") {
+	if strings.Contains(c.URL, "/api/v3") {
 		apiUrl = c.URL
 	} else {
-		apiUrl = web.JoinURL(c.URL, "/api")
+		apiUrl = web.JoinURL(c.URL, "/api/v3")
 	}
 
 	// set headers
@@ -76,7 +81,7 @@ func NewRadarrV2(name string, c *config.Pvr) *RadarrV2 {
 		"X-Api-Key": c.ApiKey,
 	}
 
-	return &RadarrV2{
+	return &RadarrV4{
 		cfg:        c,
 		log:        logger.GetLogger(name),
 		apiUrl:     apiUrl,
@@ -87,7 +92,7 @@ func NewRadarrV2(name string, c *config.Pvr) *RadarrV2 {
 
 /* Private */
 
-func (p *RadarrV2) getSystemStatus() (*RadarrV2SystemStatus, error) {
+func (p *RadarrV4) getSystemStatus() (*RadarrV4SystemStatus, error) {
 	// send request
 	resp, err := web.GetResponse(web.GET, web.JoinURL(p.apiUrl, "/system/status"), p.timeout, p.reqHeaders,
 		&pvrDefaultRetry)
@@ -103,7 +108,7 @@ func (p *RadarrV2) getSystemStatus() (*RadarrV2SystemStatus, error) {
 	}
 
 	// decode response
-	var s RadarrV2SystemStatus
+	var s RadarrV4SystemStatus
 	if err := resp.ToJSON(&s); err != nil {
 		return nil, errors.WithMessage(err, "failed decoding system status api response from radarr")
 	}
@@ -111,7 +116,7 @@ func (p *RadarrV2) getSystemStatus() (*RadarrV2SystemStatus, error) {
 	return &s, nil
 }
 
-func (p *RadarrV2) getCommandStatus(id int) (*RadarrV2CommandStatus, error) {
+func (p *RadarrV4) getCommandStatus(id int) (*RadarrV4CommandStatus, error) {
 	// send request
 	resp, err := web.GetResponse(web.GET, web.JoinURL(p.apiUrl, fmt.Sprintf("/command/%d", id)), p.timeout,
 		p.reqHeaders, &pvrDefaultRetry)
@@ -127,7 +132,7 @@ func (p *RadarrV2) getCommandStatus(id int) (*RadarrV2CommandStatus, error) {
 	}
 
 	// decode response
-	var s RadarrV2CommandStatus
+	var s RadarrV4CommandStatus
 	if err := resp.ToJSON(&s); err != nil {
 		return nil, errors.WithMessage(err, "failed decoding command status api response from radarr")
 	}
@@ -137,7 +142,7 @@ func (p *RadarrV2) getCommandStatus(id int) (*RadarrV2CommandStatus, error) {
 
 /* Interface Implements */
 
-func (p *RadarrV2) Init() error {
+func (p *RadarrV4) Init() error {
 	// retrieve system status
 	status, err := p.getSystemStatus()
 	if err != nil {
@@ -145,8 +150,8 @@ func (p *RadarrV2) Init() error {
 	}
 
 	// determine version
-	switch status.Version[0:3] {
-	case "0.2":
+	switch status.Version[0:1] {
+	case "4":
 		break
 	default:
 		return fmt.Errorf("unsupported version of radarr pvr: %s", status.Version)
@@ -154,7 +159,7 @@ func (p *RadarrV2) Init() error {
 	return nil
 }
 
-func (p *RadarrV2) GetQueueSize() (int, error) {
+func (p *RadarrV4) GetQueueSize() (int, error) {
 	// send request
 	resp, err := web.GetResponse(web.GET, web.JoinURL(p.apiUrl, "/queue"), p.timeout, p.reqHeaders,
 		&pvrDefaultRetry)
@@ -180,158 +185,137 @@ func (p *RadarrV2) GetQueueSize() (int, error) {
 	return queueSize, nil
 }
 
-func (p *RadarrV2) GetWantedMissing() ([]MediaItem, error) {
+func (p *RadarrV4) GetWantedMissing() ([]MediaItem, error) {
 	// logic vars
 	totalRecords := 0
 	var wantedMissing []MediaItem
 
-	page := 1
-	lastPageSize := pvrDefaultPageSize
-
-	// set params
-	params := req.QueryParam{
-		"pageSize":  pvrDefaultPageSize,
-		"monitored": "true",
-	}
-
 	// retrieve all page results
 	p.log.Info("Retrieving wanted missing media...")
 
-	for {
-		// break loop when all pages retrieved
-		if lastPageSize == 0 {
-			break
-		}
-
-		// set page
-		params["page"] = page
-
-		// send request
-		resp, err := web.GetResponse(web.GET, web.JoinURL(p.apiUrl, "/wanted/missing"), p.timeout,
-			p.reqHeaders, &pvrDefaultRetry, params)
-		if err != nil {
-			return nil, errors.WithMessage(err, "failed retrieving wanted missing api response from radarr")
-		}
-
-		// validate response
-		if resp.Response().StatusCode != 200 {
-			_ = resp.Response().Body.Close()
-			return nil, fmt.Errorf("failed retrieving valid wanted missing api response from radarr: %s",
-				resp.Response().Status)
-		}
-
-		// decode response
-		var m RadarrV2Wanted
-		if err := resp.ToJSON(&m); err != nil {
-			_ = resp.Response().Body.Close()
-			return nil, errors.WithMessage(err, "failed decoding wanted missing api response from radarr")
-		}
-
-		// process response
-		lastPageSize = len(m.Records)
-		for _, movie := range m.Records {
-			// is the status released?
-			if movie.Status != "released" {
-				continue
-			}
-
-			// store this movie
-			airDate := movie.AirDateUtc
-			wantedMissing = append(wantedMissing, MediaItem{
-				ItemId:     movie.Id,
-				AirDateUtc: airDate,
-				LastSearch: time.Time{},
-			})
-		}
-		totalRecords += lastPageSize
-
-		p.log.WithField("page", page).Debug("Retrieved")
-		page += 1
-
-		// close response
-		_ = resp.Response().Body.Close()
+	// send request
+	resp, err := web.GetResponse(web.GET, web.JoinURL(p.apiUrl, "/movie"), p.timeout,
+		p.reqHeaders, &pvrDefaultRetry)
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed retrieving movies api response from radarr")
 	}
+
+	// validate response
+	if resp.Response().StatusCode != 200 {
+		_ = resp.Response().Body.Close()
+		return nil, fmt.Errorf("failed retrieving valid movies api response from radarr: %s",
+			resp.Response().Status)
+	}
+
+	body, err := io.ReadAll(resp.Response().Body)
+	if err != nil {
+		_ = resp.Response().Body.Close()
+		return nil, errors.WithMessage(err, "failed decoding movies api response from radarr")
+	}
+
+	var records []RadarrV4Movie
+	if err := json.Unmarshal(body, &records); err != nil {
+		_ = resp.Response().Body.Close()
+		return nil, errors.WithMessage(err, "failed decoding movies api response from radarr")
+	}
+
+	// process response
+	for _, movie := range records {
+		// is this movie released?
+		if !movie.Monitored || movie.Status != "released" || movie.HasFile {
+			continue
+		}
+
+		//lets find the highest date.
+		airDate := movie.AirDateUtc
+
+		// Compare and update if necessary
+		if !movie.PhysicalUtc.IsZero() && movie.PhysicalUtc.After(airDate) {
+			airDate = movie.PhysicalUtc
+		}
+
+		if !movie.DigitalUtc.IsZero() && movie.DigitalUtc.After(airDate) {
+			airDate = movie.DigitalUtc
+		}
+
+		// store this movie
+		wantedMissing = append(wantedMissing, MediaItem{
+			ItemId:     movie.Id,
+			AirDateUtc: airDate,
+			LastSearch: time.Time{},
+		})
+	}
+	totalRecords += len(records)
+
+	// close response
+	_ = resp.Response().Body.Close()
 
 	p.log.WithField("media_items", totalRecords).Info("Finished")
 
 	return wantedMissing, nil
 }
 
-func (p *RadarrV2) GetWantedCutoff() ([]MediaItem, error) {
+func (p *RadarrV4) GetWantedCutoff() ([]MediaItem, error) {
 	// logic vars
 	totalRecords := 0
 	var wantedCutoff []MediaItem
 
-	page := 1
-	lastPageSize := pvrDefaultPageSize
-
-	// set params
-	params := req.QueryParam{
-		"pageSize":  pvrDefaultPageSize,
-		"monitored": "true",
-	}
-
 	// retrieve all page results
-	p.log.Info("Retrieving wanted cutoff unmet media...")
+	p.log.Info("Retrieving wanted missing media...")
 
-	for {
-		// break loop when all pages retrieved
-		if lastPageSize == 0 {
-			break
-		}
-
-		// set page
-		params["page"] = page
-
-		// send request
-		resp, err := web.GetResponse(web.GET, web.JoinURL(p.apiUrl, "/wanted/cutoff"), p.timeout,
-			p.reqHeaders, &pvrDefaultRetry, params)
-		if err != nil {
-			return nil, errors.WithMessage(err, "failed retrieving wanted cutotff unmet api response from radarr")
-		}
-
-		// validate response
-		if resp.Response().StatusCode != 200 {
-			_ = resp.Response().Body.Close()
-			return nil, fmt.Errorf("failed retrieving valid wanted cutoff unmet api response from radarr: %s",
-				resp.Response().Status)
-		}
-
-		// decode response
-		var m RadarrV2Wanted
-		if err := resp.ToJSON(&m); err != nil {
-			_ = resp.Response().Body.Close()
-			return nil, errors.WithMessage(err, "failed decoding wanted cutoff unmet api response from radarr")
-		}
-
-		// process response
-		lastPageSize = len(m.Records)
-		for _, movie := range m.Records {
-			// store this movie
-			airDate := movie.AirDateUtc
-			wantedCutoff = append(wantedCutoff, MediaItem{
-				ItemId:     movie.Id,
-				AirDateUtc: airDate,
-				LastSearch: time.Time{},
-			})
-		}
-		totalRecords += lastPageSize
-
-		p.log.WithField("page", page).Debug("Retrieved")
-		page += 1
-
-		// close response
-		_ = resp.Response().Body.Close()
+	// send request
+	resp, err := web.GetResponse(web.GET, web.JoinURL(p.apiUrl, "/movie"), p.timeout,
+		p.reqHeaders, &pvrDefaultRetry)
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed retrieving movies api response from radarr")
 	}
+
+	// validate response
+	if resp.Response().StatusCode != 200 {
+		_ = resp.Response().Body.Close()
+		return nil, fmt.Errorf("failed retrieving valid movies api response from radarr: %s",
+			resp.Response().Status)
+	}
+
+	body, err := io.ReadAll(resp.Response().Body)
+	if err != nil {
+		_ = resp.Response().Body.Close()
+		return nil, errors.WithMessage(err, "failed decoding movies api response from radarr")
+	}
+
+	var records []RadarrV4Movie
+	if err := json.Unmarshal(body, &records); err != nil {
+		_ = resp.Response().Body.Close()
+		return nil, errors.WithMessage(err, "failed decoding movies api response from radarr")
+	}
+
+	// process response
+	for _, movie := range records {
+		// is this movie monitored, cutoff unmet & file exists?
+		if !movie.MovieFile.QualityCutoffNotMet {
+			continue
+		}
+
+		airDate := movie.AirDateUtc
+		wantedCutoff = append(wantedCutoff, MediaItem{
+			ItemId:     movie.Id,
+			AirDateUtc: airDate,
+			LastSearch: time.Time{},
+		})
+	}
+	totalRecords += len(records)
+
+	// close response
+	_ = resp.Response().Body.Close()
 
 	p.log.WithField("media_items", totalRecords).Info("Finished")
 
 	return wantedCutoff, nil
 }
 
-func (p *RadarrV2) SearchMediaItems(mediaItemIds []int) (bool, error) {
+func (p *RadarrV4) SearchMediaItems(mediaItemIds []int) (bool, error) {
 	// set request data
-	payload := RadarrV2MovieSearch{
+	payload := RadarrV4MovieSearch{
 		Name:   "moviesSearch",
 		Movies: mediaItemIds,
 	}
@@ -351,7 +335,7 @@ func (p *RadarrV2) SearchMediaItems(mediaItemIds []int) (bool, error) {
 	}
 
 	// decode response
-	var q RadarrV2CommandResponse
+	var q RadarrV4CommandResponse
 	if err := resp.ToJSON(&q); err != nil {
 		return false, errors.WithMessage(err, "failed decoding command api response from radarr")
 	}

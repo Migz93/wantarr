@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"github.com/l3uddz/wantarr/database"
-	pvrObj "github.com/l3uddz/wantarr/pvr"
+	"time"
+
+	"github.com/migz93/wantarr/database"
+	pvrObj "github.com/migz93/wantarr/pvr"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/tommysolsen/capitalise"
-	"time"
 )
 
 var cutoffCmd = &cobra.Command{
@@ -35,7 +35,7 @@ var cutoffCmd = &cobra.Command{
 		// retrieve cutoff records from pvr and stash in database
 		existingItemsCount := database.GetItemsCount(lowerPvrName, "cutoff")
 		if flagRefreshCache || existingItemsCount < 1 {
-			log.Infof("Retrieving cutoff unmet media from %s: %q", capitalise.First(pvrConfig.Type), pvrName)
+			log.Infof("Retrieving cutoff unmet media from %s: %q", (pvrConfig.Type), pvrName)
 
 			cutoffRecords, err := pvr.GetWantedCutoff()
 			if err != nil {

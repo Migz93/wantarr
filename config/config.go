@@ -5,8 +5,8 @@ import (
 	"github.com/json-iterator/go"
 	"os"
 
-	"github.com/l3uddz/wantarr/logger"
-	stringutils "github.com/l3uddz/wantarr/utils/strings"
+	"github.com/migz93/wantarr/logger"
+	stringutils "github.com/migz93/wantarr/utils/strings"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"

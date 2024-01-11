@@ -2,11 +2,12 @@ package pvr
 
 import (
 	"fmt"
-	"github.com/jpillora/backoff"
-	"github.com/l3uddz/wantarr/config"
-	"github.com/l3uddz/wantarr/utils/web"
 	"strings"
 	"time"
+
+	"github.com/jpillora/backoff"
+	"github.com/migz93/wantarr/config"
+	"github.com/migz93/wantarr/utils/web"
 )
 
 var (
@@ -45,10 +46,16 @@ func Get(pvrName string, pvrType string, pvrConfig *config.Pvr) (Interface, erro
 	switch strings.ToLower(pvrType) {
 	case "sonarr_v3":
 		return NewSonarrV3(pvrName, pvrConfig), nil
+	case "sonarr_v4":
+		return NewSonarrV4(pvrName, pvrConfig), nil
 	case "radarr_v2":
 		return NewRadarrV2(pvrName, pvrConfig), nil
 	case "radarr_v3":
 		return NewRadarrV3(pvrName, pvrConfig), nil
+	case "radarr_v4":
+		return NewRadarrV4(pvrName, pvrConfig), nil
+	case "radarr_v5":
+		return NewRadarrV5(pvrName, pvrConfig), nil
 	default:
 		break
 	}

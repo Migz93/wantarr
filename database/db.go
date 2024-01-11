@@ -3,8 +3,8 @@ package database
 import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/l3uddz/wantarr/logger"
-	stringutils "github.com/l3uddz/wantarr/utils/strings"
+	"github.com/migz93/wantarr/logger"
+	stringutils "github.com/migz93/wantarr/utils/strings"
 )
 
 var (

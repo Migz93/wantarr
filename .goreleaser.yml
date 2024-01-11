@@ -16,9 +16,9 @@ builds:
       - amd64
     ldflags:
       - -s -w
-      - -X "github.com/l3uddz/wantarr/build.Version={{ .Version }}"
-      - -X "github.com/l3uddz/wantarr/build.GitCommit={{ .ShortCommit }}"
-      - -X "github.com/l3uddz/wantarr/build.Timestamp={{ .Timestamp }}"
+      - -X "github.com/migz93/wantarr/build.Version={{ .Version }}"
+      - -X "github.com/migz93/wantarr/build.GitCommit={{ .ShortCommit }}"
+      - -X "github.com/migz93/wantarr/build.Timestamp={{ .Timestamp }}"
     flags:
       - -trimpath
 
@@ -31,9 +31,9 @@ builds:
       - -linkmode external
       - -extldflags -static
       - -s -w
-      - -X "github.com/l3uddz/wantarr/build.Version={{ .Version }}"
-      - -X "github.com/l3uddz/wantarr/build.GitCommit={{ .ShortCommit }}"
-      - -X "github.com/l3uddz/wantarr/build.Timestamp={{ .Timestamp }}"
+      - -X "github.com/migz93/wantarr/build.Version={{ .Version }}"
+      - -X "github.com/migz93/wantarr/build.GitCommit={{ .ShortCommit }}"
+      - -X "github.com/migz93/wantarr/build.Timestamp={{ .Timestamp }}"
     flags:
       - -trimpath
       - -tags=netgo

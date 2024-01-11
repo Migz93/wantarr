@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"github.com/l3uddz/wantarr/utils/strings"
+	"github.com/migz93/wantarr/utils/strings"
 	"runtime"
 
 	"github.com/pkg/errors"
