@@ -45,9 +45,12 @@ pvr:
 
 
 ## Examples
-
-- `wantarr missing radarr -v -m 20`
-- `wantarr cutoff radarr4k -v -m 20`
+- Will search radarr for items that are missing, with normal verbose level, doing 2 searches of 10 entries before quitting.  
+`wantarr missing radarr -v -m 20`
+- Will search lidarr for items that haven't reached cutoff, with normal verbose level, doing 2 searches of 5 entries before quitting.  
+`wantarr cutoff radarr4k -v -s 5`
+- Will search sonarr for items that are missing, with extra verbose level, doing infinite number of searches of 10 entries at a time.  
+`wantarr missing sonarr -vv`
 
 ## Help
 ```
@@ -57,7 +60,7 @@ Available Commands:
   help        Help about any command
 
 Flags:
-  -h, --help              help for missing
+  -h, --help              help for specific command
   -m, --max-search int    Exit when this many items have been searched.
   -q, --queue-size int    Exit when queue size reached.
   -r, --refresh-cache     Refresh the locally stored cache.
@@ -65,7 +68,7 @@ Flags:
 
 Global Flags:
   -c, --config string       Config file (default "config.yaml")
-      --config-dir string   Config folder (default "C:\\Users\\migue\\AppData\\Local\\Temp\\go-build1345219734\\b001\\exe")
+      --config-dir string   Config folder (default is same location as executable)
   -d, --database string     Database file (default "vault.db")
   -l, --log string          Log file (default "activity.log")
   -v, --verbose count       Verbose level
