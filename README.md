@@ -1,14 +1,16 @@
 # wantarr
 
-A simple CLI tool that can be used to search for wanted media in:
+A simple CLI tool that can be used to search for wanted/cutoff unmet media in:
 
 - Sonarr
 - Radarr
+- Lidarr
+- Readarr
 
-Once an item has been searched, it will not be searched again until the retry days setting has been reached.
+Once an item has been searched, it will not be searched again until the retry days age has been reached.
 
 ## Configuration
-
+Name `config.yaml` and place in same directory as wantarr executable.
 ```yaml
 pvr:
   sonarr:
@@ -51,8 +53,8 @@ pvr:
 ```
 Available Commands:
   cutoff      Search for cutoff unmet media files
-  help        Help about any command
   missing     Search for missing media files
+  help        Help about any command
 
 Flags:
   -h, --help              help for missing
@@ -69,20 +71,29 @@ Global Flags:
   -v, --verbose count       Verbose level
 ```
 
-## Notes
+## Versions
 
-Supported Sonarr Version(s):
+### Supported Sonarr Version(s):
+ | Version | Config Type |
+ | :---: | :-----------: |
+ | 3 | sonarr_v3 |
+ | 4 | sonarr_v4 |
 
-- 3
-- 4
+### Supported Radarr Version(s):
+ | Version | Config Type |
+ | :---: | :-----------: |
+ | 2 (Untested) | radarr_v2 |
+ | 3 | radarr_v3 |
+ | 4 | radarr_v4 |
+ | 5 | radarr_v5 |
 
-Supported Radarr Version(s):
+### Supported Lidarr Version(s):
+ | Version | Config Type |
+ | :---: | :-----------: |
+ | 2  | lidarr_v3 |
 
-- 2
-- 3
-- 4 (Untested)
-- 5
-
-Supported Lidarr Version(s):
-
-- 2
+### Supported Readarr Version(s):
+Version 0 was tested specifically on `0.3.17.2406`
+ | Version | Config Type |
+ | :---: | :-----------: |
+ | 0  | readarr_v0 |
