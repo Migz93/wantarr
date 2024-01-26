@@ -20,7 +20,7 @@ pvr:
       cutoff: 90
   radarr:
     type: radarr_v2
-    url: https://radarr.domain.com
+    url: http://192.168.1.7:7878
     api_key: YOUR_API_KEY
     retry_days_age:
       missing: 90
@@ -28,6 +28,13 @@ pvr:
   radarr4k:
     type: radarr_v3
     url: https://radarr.domain.com
+    api_key: YOUR_API_KEY
+    retry_days_age:
+      missing: 90
+      cutoff: 90
+  lidarr:
+    type: lidarr_v2
+    url: https://lidarr.domain.com
     api_key: YOUR_API_KEY
     retry_days_age:
       missing: 90
@@ -75,3 +82,7 @@ Supported Radarr Version(s):
 - 3
 - 4 (Untested)
 - 5
+
+Supported Lidarr Version(s):
+
+- 2
