@@ -6,6 +6,7 @@ A simple CLI tool that can be used to search for wanted/cutoff unmet media in:
 - Radarr
 - Lidarr
 - Readarr
+- Whisparr
 
 Once an item has been searched, it will not be searched again until the retry days age has been reached.
 
@@ -100,3 +101,8 @@ Version 0 was tested specifically on `0.3.17.2406`
  | Version | Config Type |
  | :---: | :-----------: |
  | 0  | readarr_v0 |
+
+### Supported Whisparr Version(s):
+ | Version | Config Type |
+ | :---: | :-----------: |
+ | 2  | whisparr_v2 |

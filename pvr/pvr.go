@@ -60,6 +60,8 @@ func Get(pvrName string, pvrType string, pvrConfig *config.Pvr) (Interface, erro
 		return NewLidarrV2(pvrName, pvrConfig), nil
 	case "readarr_v0":
 		return NewReadarrV0(pvrName, pvrConfig), nil
+	case "whisparr_v2":
+		return NewWhisparrV2(pvrName, pvrConfig), nil
 	default:
 		break
 	}
