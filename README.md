@@ -93,7 +93,7 @@ Global Flags:
 ### Supported Lidarr Version(s):
  | Version | Config Type |
  | :---: | :-----------: |
- | 2  | lidarr_v3 |
+ | 2  | lidarr_v2 |
 
 ### Supported Readarr Version(s):
 Version 0 was tested specifically on `0.3.17.2406`
