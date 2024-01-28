@@ -296,7 +296,18 @@ func (p *RadarrV5) GetWantedCutoff() ([]MediaItem, error) {
 			continue
 		}
 
+		//lets find the highest date.
 		airDate := movie.AirDateUtc
+
+		// Compare and update if necessary
+		if !movie.PhysicalUtc.IsZero() && movie.PhysicalUtc.After(airDate) {
+			airDate = movie.PhysicalUtc
+		}
+
+		if !movie.DigitalUtc.IsZero() && movie.DigitalUtc.After(airDate) {
+			airDate = movie.DigitalUtc
+		}
+
 		wantedCutoff = append(wantedCutoff, MediaItem{
 			ItemId:     movie.Id,
 			AirDateUtc: airDate,
