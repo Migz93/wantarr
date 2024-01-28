@@ -29,7 +29,7 @@ type WhisparrV2Queue struct {
 
 type WhisparrV2Episode struct {
 	Id         int
-	AirDateUtc time.Time
+	AirDateUtc string `json:"releaseDate"`
 	Monitored  bool
 }
 
@@ -235,7 +235,11 @@ func (p *WhisparrV2) GetWantedMissing() ([]MediaItem, error) {
 		for _, episode := range m.Records {
 
 			// store this episode
-			airDate := episode.AirDateUtc
+			//extraDate := "T00:00:00Z"
+			//airDate := episode.AirDateUtc
+
+			airDate, _ := time.Parse("2006-01-02", episode.AirDateUtc)
+			//airDateNew := airDate+extraDate
 			wantedMissing = append(wantedMissing, MediaItem{
 				ItemId:     episode.Id,
 				AirDateUtc: airDate,
@@ -308,7 +312,7 @@ func (p *WhisparrV2) GetWantedCutoff() ([]MediaItem, error) {
 		lastPageSize = len(m.Records)
 		for _, episode := range m.Records {
 			// store this episode
-			airDate := episode.AirDateUtc
+			airDate, _ := time.Parse("2006-01-02", episode.AirDateUtc)
 			wantedCutoff = append(wantedCutoff, MediaItem{
 				ItemId:     episode.Id,
 				AirDateUtc: airDate,
