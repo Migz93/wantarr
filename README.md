@@ -1,3 +1,5 @@
+Check https://github.com/plexguide/Huntarr.io for an alternative.
+
 # wantarr
 
 A simple CLI tool that can be used to search for wanted/cutoff unmet media in:
